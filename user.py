@@ -74,18 +74,21 @@ def post_request(n):
     img = "n.png"   #"n" + n + ".jpg"
 
     #TODO get position from IMU read position.txt while running Takaklas script for localization with steps. Dont forget callibration.
-    #TODO ask for offloading first based to signal strength and position. Dont forget script for change of wifi and measurement of signal strength.
-    #TODO if response from controller is offload, then offload, otherwise execute locally.
-    #TODO per interval gather stats for all requests 
-    files = {"file": open("./" + img, "rb")}
-    post_url = "http://0.0.0.0:8000/offload"
-    r = requests.post(post_url, files=files)
-    #post_url = "http://0.0.0.0:8000/ask"
-    #payload = {"x": 5,"y": 10,"signal_strength" : 60}
-    #r = requests.post(post_url, json=payload)
+    #TODO Dont forget script for change of wifi and measurement of signal strength.
+    #TODO random position and signal strength for pc requests
+    post_url = "http://0.0.0.0:8000/ask"
+    payload = {"x": 5,"y": 10,"signal_strength" : 60}
+    r = requests.post(post_url, json=payload)
     print (r.text)
-    print (r)
-    #log.info('done')
+    if r.text == "offload":
+        files = {"file": open("./" + img, "rb")}
+        post_url = "http://0.0.0.0:8000/offload"
+        r = requests.post(post_url, files=files)
+    else :
+        print ("local execution")
+    #TODO implement service for local execution
+    #TODO per interval gather stats for all requests
+    
 
 if __name__ == "__main__":
     main()
