@@ -17,9 +17,18 @@ def update_kalman_placement():
     s.placement = kalman.placement
     s.requests = s.requests_admitted + s.requests_rejected
     s.predicted_workload = kalman.X0
-    s.average_computation_time_vdu1 = s.average_computation_time_vdu1 / s.vdu1_requests
-    s.average_computation_time_vdu2 = s.average_computation_time_vdu1 / s.vdu2_requests
-    s.average_computation_time_vdu3 = s.average_computation_time_vdu1 / s.vdu3_requests
+    try:
+        s.average_computation_time_vdu1 = s.average_computation_time_vdu1 / s.vdu1_requests
+    except ZeroDivisionError:
+        s.average_computation_time_vdu1 = 0
+    try:
+        s.average_computation_time_vdu2 = s.average_computation_time_vdu1 / s.vdu2_requests
+    except ZeroDivisionError:
+        s.average_computation_time_vdu2 = 0
+    try:
+        s.average_computation_time_vdu3 = s.average_computation_time_vdu1 / s.vdu3_requests
+    except ZeroDivisionError:
+        s.average_computation_time_vdu3 = 0
     # start of kalman update
     Q = kalman.Q 
     p0 = kalman.P0
