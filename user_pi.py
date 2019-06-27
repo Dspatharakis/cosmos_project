@@ -27,9 +27,8 @@ def main():
     x = float(result[0])
     y = float(result[1])
 
-    #TODO send random image from pool
-    n = str(random.randint(1, 3))
-    img = "n.png"   #"n" + n + ".jpg"
+    n = str(random.randint(1, 31))
+    img = n + ".png"
 
     #TODO Dont forget script for change of wifi and measurement of signal strength.
 
@@ -52,10 +51,23 @@ def main():
             with open(filename, 'a') as myfile:
                 wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
                 wr.writerow([round(response_time,5),round(computation_time,5),round((response_time-computation_time),5)])
-        else: 
-            #TODO implement service for local execution
-            #TODO get computation time as it is in controller!! json strip etc.
-            print ("local execution") 
+        else:            
+            print ("local execution")
+            files = {"file": open("./" + img, "rb")}
+            start_time = time.time()
+            post_url = "http://0.0.0.0:8000/offload"
+            r = requests.post(post_url, files=files)
+            response_time = time.time()-start_time
+            a = json.loads(r.text)
+            a = a["predictions"]
+            for key, value in a.items() :
+                if key == 'elapsed_time' :
+                    computation_time = float(value.split()[0]) # split to remove tag of seconds 
+            filename = "./requests.txt"
+            with open(filename, 'a') as myfile:
+                wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+                wr.writerow([round(response_time,5),round(computation_time,5),round((response_time-computation_time),5)])
+
     else :
         print ("local execution")
     

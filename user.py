@@ -99,11 +99,10 @@ def post_request(n):
     time.sleep(n)
     log = logging.getLogger('blocks({})'.format(n))
     
-    #TODO send random image from pool
+    n = str(random.randint(1, 31))
+    img = n + ".png"
 
-    n = str(random.randint(1, 3))
-    img = "n.png"   #"n" + n + ".jpg"
-
+    
     #TODO generate two random numbers for position and one for signal strength
 
     post_url = "http://0.0.0.0:8000/ask"
