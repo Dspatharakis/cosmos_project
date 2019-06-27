@@ -4,9 +4,9 @@ import yaml
 import requests
 import time
 import random
-from flask import Flask , redirect
+from flask import Flask 
 from app import app , db
-from flask import request, Response
+from flask import request, Response, jsonify
 from sqlalchemy import event
 from app.models import Kalman, Stats
 from sqlalchemy.sql.expression import func
@@ -83,9 +83,15 @@ def offload():
         rand = random.uniform(0,1)
         host_id = next(i for i, v in enumerate(c) if v > rand)
         print ("To host id einai : "+str(host_id))
-        start_time = time.time()
+        #start_time = time.time()
         resp = offload_to_vdu(host_id, request)
-        comput_time = time.time() - start_time
+        #comput_time = time.time() - start_time
+        a = json.loads(resp.text)
+        a = a["predictions"]
+        for key, value in a.items() :
+            if key == 'elapsed_time' :
+                computation_time = float(value.split()[0]) # split to remove tag of seconds 
+
         #requests admitted 
         p = db.session.query(func.max(Stats.id)).scalar() 
         s = Stats.query.filter_by(id=p).first()
@@ -94,15 +100,16 @@ def offload():
         #TODO change models numbers from 1,2,3 to 0,1,2
         if host_id == 0 : 
             s.vdu1_requests = s.vdu1_requests + 1 
-            s.average_computation_time_vdu1 = s.average_computation_time_vdu1 + comput_time
+            s.average_computation_time_vdu1 = s.average_computation_time_vdu1 + computation_time
         elif host_id == 1 :
             s.vdu2_requests = s.vdu2_requests + 1 
-            s.average_computation_time_vdu2 = s.average_computation_time_vdu2 + comput_time
+            s.average_computation_time_vdu2 = s.average_computation_time_vdu2 + computation_time
         else: 
             s.vdu3_requests = s.vdu3_requests + 1 
-            s.average_computation_time_vdu3 = s.average_computation_time_vdu3 + comput_time
+            s.average_computation_time_vdu3 = s.average_computation_time_vdu3 + computation_time
         db.session.commit()
-        return Response({'Response' : resp})
+        
+        return jsonify({'computation_time' : computation_time})
     else:
         p = db.session.query(func.max(Stats.id)).scalar() 
         s = Stats.query.filter_by(id=p).first()
