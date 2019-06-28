@@ -71,7 +71,7 @@ def offload():
     if z <= x0:
         #TODO delete int after db upgrade 
         topology = int(kalman.placement)
-        print (placement[topology])
+        #print (placement[topology])
         # TODO put it in db there is no need to calculate it every time
         sum=0   # maybe sum = x0 ?? please check
         d = [0] * 3

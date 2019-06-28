@@ -100,7 +100,7 @@ def post_request(n):
     log = logging.getLogger('blocks({})'.format(n))
     
     n = str(random.randint(1, 31))
-    img = n + ".png"
+    img = "test_images/"+ n + ".png"
 
 
     #TODO generate two random numbers for position and one for signal strength
