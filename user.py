@@ -102,7 +102,7 @@ def post_request(n):
     n = str(random.randint(1, 31))
     img = n + ".png"
 
-    
+
     #TODO generate two random numbers for position and one for signal strength
 
     post_url = "http://0.0.0.0:8000/ask"
@@ -125,7 +125,7 @@ def post_request(n):
                 wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
                 wr.writerow([round(response_time,5),round(computation_time,5),round((response_time-computation_time),5)])
         else: 
-        print ("local execution")
+            print ("local execution")
 
     else :
         print ("local execution")

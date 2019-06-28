@@ -55,7 +55,7 @@ def main():
             print ("local execution")
             files = {"file": open("./" + img, "rb")}
             start_time = time.time()
-            post_url = "http://0.0.0.0:8000/offload"
+            post_url = "http://0.0.0.0:8000/predict"
             r = requests.post(post_url, files=files)
             response_time = time.time()-start_time
             a = json.loads(r.text)
@@ -70,7 +70,22 @@ def main():
 
     else :
         print ("local execution")
-    
+        files = {"file": open("./" + img, "rb")}
+        start_time = time.time()
+        post_url = "http://0.0.0.0:8000/predict"
+        r = requests.post(post_url, files=files)
+        response_time = time.time()-start_time
+        a = json.loads(r.text)
+        a = a["predictions"]
+        for key, value in a.items() :
+            if key == 'elapsed_time' :
+                computation_time = float(value.split()[0]) # split to remove tag of seconds 
+        filename = "./requests.txt"
+        with open(filename, 'a') as myfile:
+            wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+            wr.writerow([round(response_time,5),round(computation_time,5),round((response_time-computation_time),5)])
+
+        
     #TODO start server at PI script
 
 
