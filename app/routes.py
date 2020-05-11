@@ -54,24 +54,30 @@ def post():
         if (x > item[0][0] and x < item[1][0]) and (y > item[0][1] and y < item[1][1]):
             if signal_strength > accepted_signal_strength:
                 return "offload"
-        else: 
-            p = db.session.query(func.max(Stats.id)).scalar()  
-            s = Stats.query.filter_by(id=p).first()
-            s.requests_locally = s.requests_locally + 1
-            db.session.commit()
-            return "locally"
 
+    kalman = Kalman.query.first()
+    z = kalman.z
+    x0 = kalman.X0
+    kalman.z = z + 1
+    db.session.commit()
+    p = db.session.query(func.max(Stats.id)).scalar()  
+    s = Stats.query.filter_by(id=p).first()
+    s.requests_locally = s.requests_locally + 1
+    db.session.commit()
+    return "locally"
 @app.route("/offload",  methods = ['POST'])
 def offload():
     kalman = Kalman.query.first()
     z = kalman.z
     x0 = kalman.X0
     kalman.z = z + 1
+    print ("to z einai:"+str(z))
     db.session.commit()
+    #x0 = 1000000000000
     if z <= x0:
         #TODO delete int after db upgrade 
         topology = int(kalman.placement)
-        #print (placement[topology])
+        print (placement[topology])
         # TODO put it in db there is no need to calculate it every time
         sum=0   # maybe sum = x0 ?? please check
         d = [0] * 3
@@ -83,21 +89,24 @@ def offload():
         rand = random.uniform(0,1)
         host_id = next(i for i, v in enumerate(c) if v > rand)
         print ("To host id einai : "+str(host_id))
-        #start_time = time.time()
+        start_time = time.time()
         resp = offload_to_vdu(host_id, request)
-        #comput_time = time.time() - start_time
+        comput_time = time.time() - start_time
+        if resp == "Host unavailable.":
+            return "locally"
         a = json.loads(resp.text)
         a = a["predictions"]
         for key, value in a.items() :
             if key == 'elapsed_time' :
                 computation_time = float(value.split()[0]) # split to remove tag of seconds 
+        #TODO queueing time -> computation time
+        computation_time = comput_time
 
         #requests admitted 
         p = db.session.query(func.max(Stats.id)).scalar() 
         s = Stats.query.filter_by(id=p).first()
         s.requests_admitted = s.requests_admitted + 1
         #requests and computation for each vdu
-        #TODO change models numbers from 1,2,3 to 0,1,2
         if host_id == 0 : 
             s.vdu1_requests = s.vdu1_requests + 1 
             s.average_computation_time_vdu1 = s.average_computation_time_vdu1 + computation_time
@@ -122,8 +131,10 @@ def offload_to_vdu(host_id, request):
     files = {"image": img}
     post_url = "http://" + ips[host_id]+ ":" + "5000" + "/predict"
     try:
-        return requests.post(post_url, files=files, timeout=15)
+        return requests.post(post_url, files=files, timeout=25)
     except (requests.Timeout, requests.ConnectionError):
         print('Host at ' + ips[host_id]  + ' unavailable.')
         return 'Host unavailable.'
         
+if __name__ == "__main__":
+    app.run(threaded=True)

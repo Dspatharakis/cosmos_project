@@ -1,14 +1,14 @@
 settings:
- Q: 0.17
- R: 0.08
+ Q: 6
+ R: 0.5
  P0: 10000
- X0: 15
+ X0: 4
  total_requests: 100
- ips: [0.0.0.0,0.0.0.0,0.0.0.0]
+ ips: [10.154.28.17,10.154.28.51,10.154.28.27]
  #ips: [192.168.0.1,192.168.0.2,192.168.0.3]
- placement: [[1,0,0],[0,1,0],[0,0,1],[1,1,0],[1,0,1],[0,1,1],[1,1,1]] # vm1 < vm2 < vm3
- workload_per_vdu: [3,5,8] # after resource profiling. means requests per interval
- placement_requests: [3,5,8,8,11,13,16] # seven different combinations, at each place are the maximum requests for each of the above placements.
- accepted_regions_of_transmission: [[[0,0],[50,50]],[[200,200],[300,400]],[[250,300],[350,450]]]   # in x,y coordinates in the millenium square / grid. 
+ placement: [[1,0,0],[0,1,0],[1,1,0],[0,0,1],[1,0,1],[0,1,1],[1,1,1]] # vm1 < vm2 < vm3
+ workload_per_vdu: [4,14,27] # after resource profiling. means requests per interval
+ placement_requests: [4,14,18,27,31,41,55] # seven different combinations, at each place are the maximum requests for each of the above placements.
+ accepted_regions_of_transmission: [[[0,0],[22,25]],[[22,0],[44,40]],[[44,25],[70,40]]]   # in x,y coordinates in the millenium square / grid. 
  #there regions are represented as the north west to south west of the respected rectangle
- accepted_signal_strength: 50 # (in db) signal strength of signal of user
+ accepted_signal_strength: -70 # (in db) signal strength of signal of user
