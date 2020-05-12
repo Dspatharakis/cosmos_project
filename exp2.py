@@ -85,21 +85,21 @@ async def post(rate):
             st = []
             for i in range(requests):
                 if i==0:
-                    st.append(random.expovariate(0.5))
+                    st.append(0.1)
                 else:
-                    st.append(st[i-1] + random.expovariate(0.5))
+                    st.append(st[i-1] + random.expovariate(rate/30))
                     if ((st[i]>29)):
-                        st[i] = random.expovariate(0.5)
-                    elif (st[i]>29):    
-                        st.append(st[i]+random.expovariate(0.5))   
-                #print (st[i])
+                        st = st[:-1]
+                        break;
+            print ("Requests for this interval: " + str(len(st)))
+            #print (st)
             futures = [
                 loop.run_in_executor(
                     executor,
                     post_request,
                     st[i],
                 )
-                for i in range(requests)
+                for i in range(len(st))
             ]
             log.info('waiting for executor tasks')
             completed, pending = await asyncio.wait(futures, timeout = 30)
@@ -109,13 +109,14 @@ async def post(rate):
 
 
 def post_request(n):
+    delay = n 
     time.sleep(n)
     log = logging.getLogger('blocks({})'.format(n))
     
     #TODO send random image from pool
 
     n = str(random.randint(1, 31))
-    img = "test_images/" + n + ".png"
+    img = "../test_images/" + n + ".png"
 
     #TODO generate two random numbers for position and one for signal strength
 
@@ -130,16 +131,23 @@ def post_request(n):
         r = requests.post(post_url, files=files)
         if r.text != "locally":
             response_time = time.time()-start_time
-            a = json.loads(r.text)
+            try:
+                a = json.loads(r.text)
+            except ValueError:
+                return
             for key, value in a.items() :
                 if key == "computation_time" :
                     computation_time = float(value)
             filename = "./requests1.txt"
             with open(filename, 'a') as myfile:
                 wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-                wr.writerow([round(response_time,5),round(computation_time,5),round((response_time-computation_time),5)])
+                wr.writerow([round(response_time,5),round(computation_time,5),round((response_time-computation_time),5),delay])
         else: 
             print ("local execution")
+            filename = "./requests_rejected.txt"
+            with open(filename, 'a') as myfile:
+                wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+                wr.writerow([n])
 
     else :
         print ("local execution")
