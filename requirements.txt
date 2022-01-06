@@ -2,7 +2,7 @@ alembic==1.0.10
 amqp==2.5.0
 asyncio==3.4.3
 billiard==3.6.0.0
-celery==4.3.0
+celery==5.2.2
 certifi==2019.3.9
 chardet==3.0.4
 Click==7.0
